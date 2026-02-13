@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seni Seviyorum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #000; color: #fff;
+            font-family: 'Poppins', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        /* Başlat Butonu Ekranı */
+        #overlay {
+            position: fixed; z-index: 100; background: #000;
+            width: 100%; height: 100%; display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        #start-btn {
+            padding: 18px 45px; font-size: 1.1rem; background: #ff4d4d;
+            color: white; border: none; cursor: pointer; border-radius: 50px;
+            font-weight: 600; letter-spacing: 1px; transition: 0.4s;
+            box-shadow: 0 10px 20px rgba(255, 77, 77, 0.3);
+        }
+        #start-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(255, 77, 77, 0.5); }
+
+        /* Yükleme Ekranı */
+        #loading-screen { text-align: center; width: 100%; padding: 20px; }
+        #percent-text { 
+            font-size: clamp(3rem, 10vw, 6rem); 
+            font-weight: 800; color: #fff; line-height: 1;
+        }
+        .bar-container { 
+            width: 60%; max-width: 500px; height: 8px; 
+            background: #1a1a1a; margin: 30px auto; border-radius: 10px; overflow: hidden;
+        }
+        #bar { width: 0%; height: 100%; background: linear-gradient(90deg, #ff4d4d, #ff8e8e); box-shadow: 0 0 15px #ff4d4d; }
+
+        /* 14 Şubat Sürpriz Ekranı */
+        #main-content {
+            display: none; text-align: center; padding: 20px;
+            animation: fadeIn 2s ease-in;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .heart { font-size: 5rem; margin-bottom: 20px; animation: beat 1s infinite alternate; }
+        @keyframes beat { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+        .message { font-size: clamp(1.5rem, 5vw, 3rem); font-weight: 800; color: #ff4d4d; margin-bottom: 5px; }
+        .sub-message { font-size: clamp(1rem, 3vw, 1.8rem); font-weight: 300; margin-bottom: 30px; opacity: 0.9; }
+        
+        .counter {
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px; border-radius: 25px;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            backdrop-filter: blur(10px); line-height: 1.8;
+        }
+        b { color: #ff4d4d; }
+    </style>
+</head>
+<body>
+
+    <audio id="music" loop>
+        <source src="muzik.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="overlay">
+        <div style="font-size: 3rem; margin-bottom: 20px;">🔒</div>
+        <button id="start-btn">SÜRPRİZİ AÇ</button>
+    </div>
+
+    <div id="loading-screen">
+        <div id="percent-text">%00.0000</div>
+        <div class="bar-container"><div id="bar"></div></div>
+        <p style="letter-spacing: 5px; color: #444; font-size: 0.8rem;">SİSTEM YÜKLENİYOR</p>
+    </div>
+
+    <div id="main-content">
+        <div class="heart">❤️</div>
+        <div class="message">İyi ki varsın, seni çok seviyorum!</div>
+        <div class="sub-message">Nice 14 Şubatlara...</div>
+        <div class="counter" id="timer"></div>
+    </div>
+
+    <script>
+        const music = document.getElementById('music');
+        const overlay = document.getElementById('overlay');
+        
+        document.getElementById('start-btn').onclick = () => {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+            music.play();
+            update();
+        };
+
+        function update() {
+            const now = new Date();
+            const year = now.getFullYear();
+            
+            // HEDEF: 14 Şubat 00:00:00
+            const start = new Date(year, 1, 13, 0, 0, 0); 
+            const end = new Date(year, 1, 14, 0, 0, 0);
+            
+            if (now < end) {
+                const total = end - start;
+                const elapsed = now - start;
+                let progress = (elapsed / total) * 100;
+                if(progress < 0) progress = 0;
+
+                document.getElementById('percent-text').innerText = "%" + progress.toFixed(4);
+                document.getElementById('bar').style.width = progress + "%";
+            } else {
+                // 14 ŞUBAT BAŞLADI
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.body.style.background = "radial-gradient(circle, #250505 0%, #000000 100%)";
+            }
+
+            // 4 OCAK SAYACI
+            const startRelation = new Date(year, 0, 4, 0, 0, 0);
+            if (now < startRelation) startRelation.setFullYear(year - 1);
+
+            const diff = now - startRelation;
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / 1000 / 60) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('timer').innerHTML = 
+                `4 Ocak'tan beri hayatımın anlamısın:<br><b>${d} Gün, ${h} Saat, ${m} Dakika, ${s} Saniye</b>`;
+
+            requestAnimationFrame(update);
+        }
+    </script>
+</body>
+</html>
